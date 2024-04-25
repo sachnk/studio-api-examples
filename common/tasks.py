@@ -10,6 +10,7 @@ from .models import Order, Trade, Position
 from .base_engine import BaseEngine
 from typing import List
 
+
 async def polygon_processor(engine: BaseEngine, msgs: List[WebSocketMessage]):
     for msg in msgs:
         if msg.event_type == "Q":
@@ -22,18 +23,23 @@ async def polygon_processor(engine: BaseEngine, msgs: List[WebSocketMessage]):
             msg: EquityAgg = msg
             engine.on_agg_min_update(msg)
 
+
 async def ws_polgon_task(engine: BaseEngine, symbols: List[str], api_key: str):
-    subscriptions = [f"Q.{symbol}" for symbol in symbols] + [f"A.{symbol}" for symbol in symbols] + [f"AM.{symbol}" for symbol in symbols]
-    ws = WebSocketClient(api_key=api_key, feed=Feed.PolyFeed, subscriptions=subscriptions, verbose=True)
+    subscriptions = (
+        [f"Q.{symbol}" for symbol in symbols]
+        + [f"A.{symbol}" for symbol in symbols]
+        + [f"AM.{symbol}" for symbol in symbols]
+    )
+    ws = WebSocketClient(
+        api_key=api_key, feed=Feed.PolyFeed, subscriptions=subscriptions, verbose=True
+    )
     await ws.connect(processor=lambda msgs: polygon_processor(engine, msgs))
+
 
 async def ws_studio_task(engine: BaseEngine, url: str, auth: str, account: str):
     msg = {
         "authorization": auth,
-        "payload": {
-            "type": "subscribe-activity",
-            "account_id": account
-        }
+        "payload": {"type": "subscribe-activity", "account_id": account},
     }
     url = url.replace("http://", "ws://").replace("https://", "wss://")
     url = f"{url}/v2/ws"
@@ -53,6 +59,7 @@ async def ws_studio_task(engine: BaseEngine, url: str, auth: str, account: str):
                 engine.on_position_update(Position(**payload["data"]))
             elif payload["type"] == "replay-complete":
                 engine.on_ready()
+
 
 async def timer_task(engine: BaseEngine):
     while True:

@@ -1,6 +1,7 @@
 from typing import Optional
 from dataclasses import dataclass
 
+
 @dataclass
 class Order:
     created_at: int
@@ -23,6 +24,7 @@ class Order:
     reference_id: Optional[str] = None
     text: Optional[str] = None
 
+
 @dataclass
 class Trade:
     created_at: int
@@ -34,11 +36,13 @@ class Trade:
     quantity: str
     price: str
 
+
 @dataclass
 class Position:
     account_id: str
     symbol: str
     quantity: str
+
 
 @dataclass
 class EngineConfig:

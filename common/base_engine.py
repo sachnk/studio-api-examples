@@ -4,6 +4,7 @@ from typing import Dict, List
 from polygon.websocket.models import EquityQuote, EquityAgg
 from .models import Order, Trade, Position, EngineConfig
 
+
 class BaseEngine:
     def __init__(self, config: EngineConfig):
         self.config = config
@@ -23,7 +24,9 @@ class BaseEngine:
     # invoked when all replayed data has been received
     def on_ready(self):
         self.ready = True
-        logging.info("%s engine ready, position = %d", self.config.symbol, self.position)
+        logging.info(
+            "%s engine ready, position = %d", self.config.symbol, self.position
+        )
 
     # invoked when an order state updates from studio
     def on_order_update(self, order: Order) -> None:
@@ -36,13 +39,17 @@ class BaseEngine:
         if order.state == "rejected":
             logging.warn("Order %s rejected: %s", order.order_id, order.text)
             self.num_rejects += 1
-            if (self.num_rejects >= self.config.max_rejects):
+            if self.num_rejects >= self.config.max_rejects:
                 raise RuntimeError("Too many rejects")
 
         if order.state != "open":
             removed = self.open_orders.pop(order.order_id, None)
             if removed is not None:
-                self.open_buys.remove(removed) if removed.side == "buy" else self.open_sells.remove(removed)
+                (
+                    self.open_buys.remove(removed)
+                    if removed.side == "buy"
+                    else self.open_sells.remove(removed)
+                )
         else:
             self.open_orders[order.order_id] = order
             if order.side == "buy":
@@ -57,7 +64,13 @@ class BaseEngine:
         if trade.symbol != self.config.symbol:
             return
 
-        logging.info("%s trade: %s %s @ %s", self.config.symbol, trade.side, trade.quantity, trade.price)
+        logging.info(
+            "%s trade: %s %s @ %s",
+            self.config.symbol,
+            trade.side,
+            trade.quantity,
+            trade.price,
+        )
 
     # invoked when a position update occurs from studio
     def on_position_update(self, position: Position) -> None:
@@ -78,14 +91,14 @@ class BaseEngine:
     def on_agg_sec_update(self, agg: EquityAgg) -> None:
         if agg.symbol != self.config.symbol:
             return
-        
+
         self.agg_sec = agg
-    
+
     # invoked when a minute aggregate update occurs from polygon
     def on_agg_min_update(self, agg: EquityAgg) -> None:
         if agg.symbol != self.config.symbol:
             return
-        
+
         self.agg_min = agg
 
     def submit_order(self, side: str, quantity: int, price: str) -> None:
@@ -94,24 +107,30 @@ class BaseEngine:
         if side == "buy" and abs(self.position + quantity) > self.config.max_position:
             logging.info("Cannot submit order; max position will breach")
             return
-        
+
         if side == "sell" and abs(self.position - quantity) > self.config.max_position:
             logging.info("Cannot submit order; max position will breach")
             return
 
         url = f"{self.config.url}/v2/accounts/{self.config.account}/orders"
         headers = {"Authorization": f"Bearer {self.config.auth}"}
-        response = requests.post(url, headers=headers, json={
-            "symbol": self.config.symbol,
-            "side": side,
-            "quantity": str(quantity),
-            "price": price,
-            "order_type": "limit",
-            "time_in_force": "day",
-            "strategy_type": "sor"
-        })
-        if (response.status_code != 201):
-            raise RuntimeError(f"Failed submitting order: {response.status_code}, {response.text}")
+        response = requests.post(
+            url,
+            headers=headers,
+            json={
+                "symbol": self.config.symbol,
+                "side": side,
+                "quantity": str(quantity),
+                "price": price,
+                "order_type": "limit",
+                "time_in_force": "day",
+                "strategy_type": "sor",
+            },
+        )
+        if response.status_code != 201:
+            raise RuntimeError(
+                f"Failed submitting order: {response.status_code}, {response.text}"
+            )
 
         order_id = response.json()["order_id"]
         self.submitted_orders.append(order_id)
@@ -121,8 +140,10 @@ class BaseEngine:
         url = f"{self.config.url}/v2/accounts/{self.config.account}/orders/{order.order_id}"
         headers = {"Authorization": f"Bearer {self.config.auth}"}
         response = requests.delete(url, headers=headers)
-        if (response.status_code != 201):
-            raise RuntimeError(f"Failed cancelling order: {response.status_code}, {response.text}")
+        if response.status_code != 201:
+            raise RuntimeError(
+                f"Failed cancelling order: {response.status_code}, {response.text}"
+            )
 
         logging.info("Cancelled order: %s", order.order_id)
 
@@ -130,8 +151,10 @@ class BaseEngine:
         url = f"{self.config.url}/v2/accounts/{self.config.account}/orders"
         headers = {"Authorization": f"Bearer {self.config.auth}"}
         response = requests.delete(url, headers=headers)
-        if (response.status_code != 201):
-            raise RuntimeError(f"Failed cancelling all orders: {response.status_code}, {response.text}")
+        if response.status_code != 201:
+            raise RuntimeError(
+                f"Failed cancelling all orders: {response.status_code}, {response.text}"
+            )
 
         logging.info("Cancelled all orders")
 
