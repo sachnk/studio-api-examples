@@ -1,17 +1,24 @@
 [tool.poetry]
-name = "quoter"
+name = "studio-api-examples"
 version = "0.1.0"
-description = ""
+description = "test"
 authors = ["Sachin Kumar <skumar@clearstreet.io>"]
 license = "MIT"
+readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.12"
+numpy = "^1.26.4"
+pandas = "^2.2.2"
 polygon-api-client = "^1.13.5"
 requests = "^2.31.0"
+setuptools = "^69.5.1"
+ta = "^0.11.0"
 
-[tool.poetry.dev-dependencies]
+
+[tool.poetry.group.dev.dependencies]
+black = "^24.4.1"
 
 [build-system]
-requires = ["poetry-core>=1.0.0"]
+requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"

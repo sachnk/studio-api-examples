@@ -2,6 +2,7 @@ import json
 import asyncio
 import websockets
 import logging
+import time
 
 from polygon import WebSocketClient
 from polygon.websocket.models import WebSocketMessage, EquityQuote, EquityAgg
@@ -50,13 +51,14 @@ async def ws_studio_task(engine: BaseEngine, url: str, auth: str, account: str):
         logging.info("studio websocket connected")
         while True:
             msg = await ws.recv()
+            timestamp = int(time.time() * 1000)
             payload = json.loads(msg)["payload"]
             if payload["type"] == "order-update":
-                engine.on_order_update(Order(**payload["data"]))
+                engine.on_order_update(timestamp, Order(**payload["data"]))
             elif payload["type"] == "trade-notice":
-                engine.on_trade_notice(Trade(**payload["data"]))
+                engine.on_trade_notice(timestamp, Trade(**payload["data"]))
             elif payload["type"] == "position-update":
-                engine.on_position_update(Position(**payload["data"]))
+                engine.on_position_update(timestamp, Position(**payload["data"]))
             elif payload["type"] == "replay-complete":
                 engine.on_ready()
 
