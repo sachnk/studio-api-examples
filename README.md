@@ -12,7 +12,8 @@ You need at least python 3.12 and poetry 1.8.2 to run the examples. In addition,
 
 ```
 $ poetry install
-$ poetry run maker-example/app.py AAPL --levels 5 --url api.clearstreet.io/studio --account <your-account> --polygon-api-key <polygon-api-key> --auth <studio-access-token>
+$ cd maker-example
+$ poetry run python3 app.py AAPL --url api.clearstreet.io/studio --account <your-account> --polygon-api-key <polygon-api-key> --auth <studio-access-token>
 ```
 
 This will launch a quoting engine for `AAPL`. It will maintain 5 price-levels on both buy/sell sides.
@@ -21,7 +22,8 @@ This will launch a quoting engine for `AAPL`. It will maintain 5 price-levels on
 
 ```
 $ poetry install
-$ poetry run taker-example/app.py MSFT NVDA --url api.clearstreet.io/studio --account <your-account> --polygon-api-key <polygon-api-key> --auth <studio-access-token>
+$ cd taker-example
+$ poetry run python3 app.py MSFT NVDA --url api.clearstreet.io/studio --account <your-account> --polygon-api-key <polygon-api-key> --auth <studio-access-token>
 ```
 
 This will launch a taker engine that looks triggers IOC orders on `MSFT` based on the exponential moving-average of `NVDA` 1-second bars. If the EMA on `NVDA`, linearly priced to `MSFT`, exceeds `MSFT`'s current BBO, the engine will take liquidity.
