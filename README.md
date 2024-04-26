@@ -1,12 +1,27 @@
-# quoter
+# Studio API Examples
 
-Your standard issue quote-bot. Use this to test our Studio EMS API.
+This project contains examples of using Clear Street Studio's [API](https://docs.clearstreet.io/studio). These examples are for illustrative purposes only, and not intended for production use.
 
-## Usage
+The strategies here are toy examples.
 
-You need two API keys for to use this app: a [Studio API access-token](https://docs.clearstreet.io/studio/docs/authentication-1), and a Polygon PolyFeed API key.
+## Prequisites 
 
-To quote SPY in dev with `0.50` minimum difference vs. mid-point:
+You need at least python 3.12 and poetry 1.8.2 to run the examples. In addition, for market-data, you need an API key from [polygon.io](https://polygon.io).
+
+## Maker Usage
+
 ```
-python3 app.py --symbol SPY --levels 5 --min-edge 0.50 --min-tick 0.05 --url api.co.clearstreet.io/studio --account 102396 --polygon-api-key <polygon-api-key> --auth <studio-access-token>
+$ poetry install
+$ poetry run maker-example/app.py AAPL --levels 5 --url api.clearstreet.io/studio --account <your-account> --polygon-api-key <polygon-api-key> --auth <studio-access-token>
 ```
+
+This will launch a quoting engine for `AAPL`. It will maintain 5 price-levels on both buy/sell sides.
+
+## Taker Example
+
+```
+$ poetry install
+$ poetry run taker-example/app.py MSFT NVDA --url api.clearstreet.io/studio --account <your-account> --polygon-api-key <polygon-api-key> --auth <studio-access-token>
+```
+
+This will launch a taker engine that looks triggers IOC orders on `MSFT` based on the exponential moving-average of `NVDA` 1-second bars. If the EMA on `NVDA`, linearly priced to `MSFT`, exceeds `MSFT`'s current BBO, the engine will take liquidity.
