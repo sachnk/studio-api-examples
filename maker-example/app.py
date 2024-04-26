@@ -14,6 +14,7 @@ from common import add_common_args, ws_polgon_task, ws_studio_task, timer_task
 engine: Engine = None
 
 def signal_handler(sig, frame):
+    engine.cancel_all_orders()
     logging.info("Dumping stats...")
     engine.dump_stats()
     sys.exit(0)
